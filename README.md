@@ -7,7 +7,7 @@
 - **feign-api**: Feign 调用模块
 
 ## 技术栈
-- JDK 25
+- JDK 17
 - Spring Boot 3.4.1
 - Spring Cloud 2024.0.0
 - Spring Cloud Alibaba 2023.0.3.2
