@@ -15,6 +15,8 @@ public class User {
     private String nickname;
     private String email;
     private String phone;
+    private Integer deleted;
+    private Integer status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -64,6 +66,22 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Integer getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Integer deleted) {
+        this.deleted = deleted;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreateTime() {

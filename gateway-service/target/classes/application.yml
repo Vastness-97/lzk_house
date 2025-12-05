@@ -22,3 +22,4 @@ spring:
             - Path=/user/**
           filters:
             - StripPrefix=1
+

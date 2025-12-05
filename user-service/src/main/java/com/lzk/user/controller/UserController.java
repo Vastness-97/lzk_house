@@ -1,29 +1,43 @@
 package com.lzk.user.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzk.common.result.Result;
-import com.lzk.user.dto.LoginRequest;
 import com.lzk.user.entity.User;
-import com.lzk.user.service.UserService;
+import com.lzk.user.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
     
     @Autowired
-    private UserService userService;
+    private UserMapper userMapper;
 
-    @PostMapping("/login")
-    public Result<User> login(@RequestBody LoginRequest request) {
-        User user = userService.login(request.getUsername(), request.getPassword());
-        if (user != null) {
-            user.setPassword(null);
-            return Result.success(user);
-        }
-        return Result.error("用户名或密码错误");
+    @GetMapping("/query")
+    public Result<User> queryUser(@RequestParam("username") String username, @RequestParam("password") String password) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username)
+               .eq(User::getPassword, password);
+        User user = userMapper.selectOne(wrapper);
+        return Result.success(user);
+    }
+
+    @PostMapping("/create")
+    public Result<Boolean> createUser(@RequestBody User user) {
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+        int rows = userMapper.insert(user);
+        return Result.success(rows > 0);
+    }
+
+    @GetMapping("/exists")
+    public Result<Boolean> isUsernameExists(@RequestParam("username") String username) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username);
+        long count = userMapper.selectCount(wrapper);
+        return Result.success(count > 0);
     }
 }

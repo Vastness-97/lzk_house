@@ -16,10 +16,12 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/user/**
-          filters:
-            - StripPrefix=1
 
