@@ -27,11 +27,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public Result<String> register(@Valid @RequestBody RegisterRequest request) {
-        boolean success = authService.register(request);
-        if (success) {
-            return Result.success("注册成功");
-        } else {
-            return Result.error("用户名已存在");
-        }
+        authService.register(request);
+        return Result.success("注册成功");
     }
 }

@@ -24,4 +24,10 @@ public class GlobalExceptionHandler {
         log.error("系统异常: ", e);
         return Result.error("系统异常：" + e.getMessage());
     }
+
+    @ExceptionHandler(BusinessException.class)
+    public Result<?> handleBusinessException(IErrorCode e) {
+        return Result.error(e.getCode(), e.getMsg());
+    }
+
 }

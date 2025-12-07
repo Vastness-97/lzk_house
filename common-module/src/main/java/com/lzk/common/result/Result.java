@@ -1,5 +1,7 @@
 package com.lzk.common.result;
 
+import com.lzk.common.exception.IErrorCode;
+
 public class Result<T> {
     private Integer code;
     private String message;
@@ -41,6 +43,20 @@ public class Result<T> {
         Result<T> result = new Result<>();
         result.setCode(500);
         result.setMessage(message);
+        return result;
+    }
+
+    public static <T> Result<T> error(Integer code,String message) {
+        Result<T> result = new Result<>();
+        result.setCode(code);
+        result.setMessage(message);
+        return result;
+    }
+
+    public static <T> Result<T> error(IErrorCode e) {
+        Result<T> result = new Result<>();
+        result.setCode(e.getCode());
+        result.setMessage(e.getMsg());
         return result;
     }
 }

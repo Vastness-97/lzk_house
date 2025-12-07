@@ -11,12 +11,14 @@ CREATE TABLE IF NOT EXISTS `user` (
   `nickname` VARCHAR(50) DEFAULT NULL COMMENT '昵称',
   `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
   `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
+  `deleted` INT DEFAULT 0 COMMENT '删除标记：0未删除 1已删除',
+  `status` INT DEFAULT 1 COMMENT '用户状态：1正常 0禁用',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
--- 插入测试数据
-INSERT INTO `user` (`username`, `password`, `nickname`, `email`, `phone`) 
-VALUES ('admin', '123456', '管理员', 'admin@example.com', '13800138000');
+-- 插入测试数据（密码需要用 BCrypt 加密后的值）
+INSERT INTO `user` (`username`, `password`, `nickname`, `email`, `phone`, `deleted`, `status`) 
+VALUES ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '管理员', 'admin@example.com', '13800138000', 0, 1);

@@ -1,4 +1,4 @@
-package com.lzk.user.controller;
+package com.lzk.user.controller.internal;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzk.common.result.Result;
@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * 内部调用controller
+ */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/internal/user")
 public class UserInternalController {
     
     @Autowired

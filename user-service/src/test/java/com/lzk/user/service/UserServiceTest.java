@@ -2,8 +2,8 @@ package com.lzk.user.service;
 
 import com.lzk.user.dto.LoginResponse;
 import com.lzk.user.entity.User;
-import com.lzk.user.exception.LoginException;
 import com.lzk.user.mapper.UserMapper;
+import jakarta.security.auth.message.AuthException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,8 +44,8 @@ class UserServiceTest {
     @Test
     void testLoginFailure() {
         when(userMapper.selectOne(any())).thenReturn(null);
-        
-        assertThrows(LoginException.class, () -> {
+
+        assertThrows(AuthException.class, () -> {
             userService.login("wronguser", "wrongpass");
         });
     }

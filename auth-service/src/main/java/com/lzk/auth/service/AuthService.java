@@ -2,8 +2,11 @@ package com.lzk.auth.service;
 
 import com.lzk.auth.dto.LoginResponse;
 import com.lzk.auth.dto.RegisterRequest;
+import com.lzk.auth.exception.AuthErrorCode;
 import com.lzk.auth.exception.AuthException;
 import com.lzk.common.constant.UserConstants;
+import com.lzk.common.enums.DeleteStatus;
+import com.lzk.common.enums.UserStatus;
 import com.lzk.common.result.Result;
 import com.lzk.common.util.JwtUtil;
 import com.lzk.feign.UserFeignClient;
@@ -34,17 +37,17 @@ public class AuthService {
         
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             log.warn("登录失败: 用户名或密码错误, username={}", username);
-            throw new AuthException("用户名或密码错误");
+            throw new AuthException(AuthErrorCode.ACCOUNT_OR_PASSWORD_ERROR);
         }
         
         if (UserConstants.DELETED_YES.equals(user.getDeleted())) {
             log.warn("登录失败: 用户已被删除, username={}", username);
-            throw new AuthException("用户不存在");
+            throw new AuthException(AuthErrorCode.ACCOUNT_DELETED);
         }
         
         if (UserConstants.STATUS_DISABLED.equals(user.getStatus())) {
             log.warn("登录失败: 用户已被禁用, username={}", username);
-            throw new AuthException("用户已被禁用");
+            throw new AuthException(AuthErrorCode.ACCOUNT_DISABLED);
         }
         
         log.info("用户登录成功: username={}, userId={}", username, user.getId());
@@ -61,8 +64,8 @@ public class AuthService {
         log.info("用户注册请求: username={}", request.getUsername());
         Result<Boolean> existsResult = userFeignClient.isUsernameExists(request.getUsername());
         if (existsResult.getData()) {
-            log.warn("注册失败: 用户名已存在, username={}", request.getUsername());
-            return false;
+            log.warn("注册失败: 账号已存在, username={}", request.getUsername());
+            throw  new AuthException(AuthErrorCode.ACCOUNT_EXISTS);
         }
 
 
@@ -72,8 +75,8 @@ public class AuthService {
         userDTO.setNickname(request.getNickname());
         userDTO.setEmail(request.getEmail());
         userDTO.setPhone(request.getPhone());
-        userDTO.setDeleted(UserConstants.DELETED_NO);
-        userDTO.setStatus(UserConstants.STATUS_NORMAL);
+        userDTO.setDeleted(DeleteStatus.NOT_DELETED.getCode());
+        userDTO.setStatus(UserStatus.NORMAL.getCode());
         userDTO.setCreateTime(LocalDateTime.now());
         userDTO.setUpdateTime(LocalDateTime.now());
 
