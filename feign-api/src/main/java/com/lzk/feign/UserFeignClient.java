@@ -6,16 +6,15 @@ import com.lzk.feign.fallback.UserFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(value = "user-service",fallback = UserFeignClientFallback.class)
-@RequestMapping("/internal/user")
+@FeignClient(value = "user-service", path = "/internal/user", fallback = UserFeignClientFallback.class)
 public interface UserFeignClient {
     
-    @GetMapping("query")
+    @GetMapping("/query")
     Result<UserDTO> queryUser(@RequestParam("username") String username);
     
-    @PostMapping("create")
+    @PostMapping("/create")
     Result<Boolean> createUser(@RequestBody UserDTO userDTO);
     
-    @GetMapping("exists")
+    @GetMapping("/exists")
     Result<Boolean> isUsernameExists(@RequestParam("username") String username);
 }

@@ -34,7 +34,6 @@ public class AuthService {
         log.info("用户登录请求: username={}", username);
         Result<UserDTO> result = userFeignClient.queryUser(username);
         UserDTO user = result.getData();
-        
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             log.warn("登录失败: 用户名或密码错误, username={}", username);
             throw new AuthException(AuthErrorCode.ACCOUNT_OR_PASSWORD_ERROR);
