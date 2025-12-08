@@ -151,3 +151,30 @@ Authorization: Bearer <token>
 1. 注册用户
 2. 登录获取 Token
 3. 携带 Token 访问其他接口
+
+## RBAC权限管理
+
+### 数据库表
+- **role**: 角色表
+- **permission**: 权限表
+- **user_role**: 用户角色关联表
+- **role_permission**: 角色权限关联表
+
+### 初始化RBAC
+```bash
+mysql -u root -p lzk_house < user-service/src/main/resources/sql/rbac.sql
+```
+
+### 权限管理接口
+- 角色管理: `/role/**`
+- 权限管理: `/permission/**`
+- 用户角色分配: `POST /role/assign/{userId}`
+- 角色权限分配: `POST /role/permission/{roleId}`
+
+### 权限验证
+- JWT Token包含用户权限列表
+- 网关层统一权限验证
+- 超级管理员(ROLE_ADMIN)拥有所有权限
+- 权限编码格式: `资源:操作` (如: user:query, role:add)
+
+详细文档请查看: [README_RBAC.md](README_RBAC.md)

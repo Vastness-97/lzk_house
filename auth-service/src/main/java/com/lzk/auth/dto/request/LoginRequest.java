@@ -1,4 +1,4 @@
-package com.lzk.auth.dto;
+package com.lzk.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

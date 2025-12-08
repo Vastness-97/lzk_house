@@ -1,4 +1,4 @@
-package com.lzk.auth.dto;
+package com.lzk.auth.dto.response;
 
 import com.lzk.feign.dto.UserDTO;
 
