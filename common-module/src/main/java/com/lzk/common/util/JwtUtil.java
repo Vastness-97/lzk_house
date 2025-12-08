@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 /**
  * JWT工具类
@@ -31,11 +32,29 @@ public class JwtUtil {
      */
     public static String generateToken(Long userId, String username) {
         return Jwts.builder()
-                .setSubject(userId.toString())  // 设置主题为用户ID
-                .claim("username", username)    // 添加用户名声明
-                .setIssuedAt(new Date())        // 设置签发时间
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))  // 设置过期时间
-                .signWith(KEY, SignatureAlgorithm.HS256)  // 使用HS256算法签名
+                .setSubject(userId.toString())
+                .claim("username", username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .signWith(KEY, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * 生成JWT token（包含权限）
+     * @param userId 用户ID
+     * @param username 用户名
+     * @param permissions 权限列表
+     * @return JWT token字符串
+     */
+    public static String generateToken(Long userId, String username, List<String> permissions) {
+        return Jwts.builder()
+                .setSubject(userId.toString())
+                .claim("username", username)
+                .claim("permissions", permissions)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .signWith(KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -85,5 +104,16 @@ public class JwtUtil {
     public static String getUsername(String token) {
         Claims claims = parseToken(token);
         return claims.get("username", String.class);
+    }
+
+    /**
+     * 从token中获取权限列表
+     * @param token JWT token
+     * @return 权限列表
+     */
+    @SuppressWarnings("unchecked")
+    public static List<String> getPermissions(String token) {
+        Claims claims = parseToken(token);
+        return claims.get("permissions", List.class);
     }
 }

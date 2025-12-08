@@ -16,16 +16,27 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 认证过滤器
+ * 对所有请求进行Token验证，白名单路径除外
+ */
 @Component
 public class AuthFilter implements GlobalFilter, Ordered {
     
     private static final Logger log = LoggerFactory.getLogger(AuthFilter.class);
     
+    /** 白名单路径，无需Token验证 */
     private static final List<String> WHITE_LIST = Arrays.asList(
         "/auth/login",
         "/auth/register"
     );
 
+    /**
+     * 过滤器核心逻辑
+     * @param exchange 请求上下文
+     * @param chain 过滤器链
+     * @return Mono响应
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -39,18 +50,20 @@ public class AuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
         
-        // 获取token
+        // 从请求头获取Token
         String token = request.getHeaders().getFirst("Authorization");
         if (token == null || token.isEmpty()) {
             log.warn("Token为空，拒绝访问: {}", path);
             return unauthorized(exchange.getResponse());
         }
         
-        // 验证token
+        // 验证Token有效性
         try {
+            // 移除Bearer前缀
             if (token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }
+            // 解析并验证Token
             JwtUtil.parseToken(token);
             log.debug("Token验证通过: {}", path);
             return chain.filter(exchange);
@@ -60,15 +73,24 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
     }
     
+    /**
+     * 判断是否为白名单路径
+     */
     private boolean isWhitePath(String path) {
         return WHITE_LIST.stream().anyMatch(path::startsWith);
     }
     
+    /**
+     * 返回401未授权响应
+     */
     private Mono<Void> unauthorized(ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         return response.setComplete();
     }
 
+    /**
+     * 过滤器执行顺序，数值越小优先级越高
+     */
     @Override
     public int getOrder() {
         return -100;
