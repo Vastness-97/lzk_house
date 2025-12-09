@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * TODO：需要提取多个常量
  * JWT工具类
  * 提供JWT token的生成、解析、验证等功能
  */

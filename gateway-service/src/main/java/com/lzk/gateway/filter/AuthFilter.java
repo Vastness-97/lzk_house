@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzk.common.result.Result;
 import com.lzk.common.util.JwtUtil;
+import com.lzk.gateway.exception.GatewayErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +37,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
     @Resource
     private ObjectMapper objectMapper;
 
-
     /**
+     * TODO：白名单优化，加入到配置文件中
      * 白名单路径，无需Token验证
      */
     private static final List<String> WHITE_LIST = Arrays.asList(
@@ -67,9 +70,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
         String token = request.getHeaders().getFirst("Authorization");
         if (token == null || token.isEmpty()) {
             log.warn("Token为空，拒绝访问: {}", path);
-            return unauthorized(exchange.getResponse(), "未提供认证Token");
+            return unauthorized(exchange.getResponse(), GatewayErrorCode.TOKEN_EMPTY.getCode(),GatewayErrorCode.TOKEN_EMPTY.getMsg());
         }
-
         // 验证Token有效性
         try {
             // 移除Bearer前缀
@@ -80,9 +82,12 @@ public class AuthFilter implements GlobalFilter, Ordered {
             JwtUtil.parseToken(token);
             log.debug("Token验证通过: {}", path);
             return chain.filter(exchange);
-        } catch (Exception e) {
-            log.warn("Token验证失败: {}, error: {}", path, e.getMessage());
-            return unauthorized(exchange.getResponse(), "Token无效或已过期");
+        } catch (ExpiredJwtException e) {
+            log.warn("Token验证失败: {}, error: {}", path, GatewayErrorCode.TOKEN_EXPIRED.getMsg());
+            return unauthorized(exchange.getResponse(), GatewayErrorCode.TOKEN_EXPIRED.getCode(),GatewayErrorCode.TOKEN_EXPIRED.getMsg());
+        } catch (JwtException e) {
+            log.warn("Token验证失败: {}, error: {}", path, GatewayErrorCode.TOKEN_INVALID.getMsg());
+            return unauthorized(exchange.getResponse(), GatewayErrorCode.TOKEN_INVALID.getCode(),GatewayErrorCode.TOKEN_INVALID.getMsg());
         }
     }
 
@@ -94,14 +99,15 @@ public class AuthFilter implements GlobalFilter, Ordered {
     }
 
     /**
+     * TODO: 封装一个JACKSON的工具类
      * 返回401未授权响应
      */
-    private Mono<Void> unauthorized(ServerHttpResponse response, String msg) {
+    private Mono<Void> unauthorized(ServerHttpResponse response, int code,String msg) {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         
         try {
-            byte[] bytes = objectMapper.writeValueAsBytes(Result.error(40101, msg));
+            byte[] bytes = objectMapper.writeValueAsBytes(Result.error(code, msg));
             DataBuffer dataBuffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(dataBuffer));
         } catch (JsonProcessingException e) {
